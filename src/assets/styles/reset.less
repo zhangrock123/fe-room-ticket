@@ -1,0 +1,186 @@
+/* 第三方样式库样式修改 */
+
+/* .el-menu */
+.el-menu{
+  border-right: 0;
+  .el-menu-item{
+    height: 46px;
+    line-height: 46px;
+    padding: 0 15px;
+    +*{
+      /* border-top: 1px solid #999; */
+    }
+  }
+}
+
+/* el-input */
+.el-input{
+  &.inline{
+    width: auto;
+    display: inline-block;
+  }
+  &.no-padding{
+    input{
+      padding: 0;
+    }
+  }
+  &.text-center{
+    input{
+      text-align: center;
+    }
+  }
+  &.verify-image{
+    overflow: hidden;
+    .el-input-group__append{
+      padding:0;
+      img{
+        cursor: pointer;
+        width: 100px;
+        height: 35px;
+        display: block;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  }
+}
+
+.el-button{
+  +.el-button{
+    margin-left: 3px;
+  }
+  &.el-button--mini, &.el-button--mini.is-round{
+    &.no-padding{
+      padding: 7px 5px;
+    }
+  }
+}
+
+/* el-table */
+.el-table{
+  *{
+    font-size: 12px;
+  }
+  td,th{
+    padding: 8px 0;
+  }
+  th.is-leaf{
+    border-bottom: 2px solid #ebeef5;
+  }
+}
+
+/* el-date-editor */
+.el-date-editor{
+  .el-range-separator{
+    width: auto;
+  }
+  &.no-padding{
+    .el-input__inner{
+      padding-left: 0;
+      padding-right:0;
+    }
+  }
+  &.text-center{
+    .el-input__inner{
+      text-align: center;
+    }
+  }
+  &.inline{
+    width: auto;
+  }
+  &.no-icon{
+    .el-input__suffix,
+    .el-input__prefix{
+      display: none;
+    }
+  }
+}
+
+
+/* el-dialog */
+.el-dialog{
+  &.common-dialog{
+    width: 50%;
+    min-width: 500px;
+    &.small-size{
+      width: 30%;
+      min-width: 300px;
+    }
+    &.middle-size{
+      width: 50%;
+      min-width: 500px;
+    }
+    &.normal-size{
+      width: 60%;
+      min-width: 600px;
+    }
+    &.large-size{
+      width: 70%;
+      min-width: 700px;
+    }
+  }
+  .el-dialog__header{
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    .el-dialog__title{
+      font-size: 16px;
+    }
+    .el-dialog__headerbtn{
+      top: 13px;
+      right: 15px;
+      i{
+        font-size: 18px;
+      }
+    }
+  }
+  .el-dialog__body{
+    padding: 20px 15px;
+    min-height: 100px;
+  }
+  .el-dialog__footer{
+    border-top: 1px solid #eee;
+    padding: 10px 15px;
+  }
+}
+
+
+/* loading */
+.el-loading-mask{
+  background-color: rgba(255,255,255,0.5);
+}
+
+/* popover */
+.el-popover{
+  &.tips{
+    &.el-popover--plain{
+      padding: 0;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+    min-width: auto;
+    background-color: #000;
+    color: #fff;
+    border: 1px solid transparent;
+    .popper__arrow{
+      &:after{
+        border-top-color: #000;
+      }
+    }
+  }
+
+}
+
+/*breadcrumb*/
+.el-breadcrumb{
+  *{
+    font-size: 13px;
+  }
+  padding: 10px 0;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 1px rgba(0,0,0,.05);
+}
+
+/* el-tabs */
+.el-tabs--border-card{
+  box-shadow: none;
+}

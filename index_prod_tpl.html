@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <!--忽略电话号码和email识别-->
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="format-detection" content="email=no" />
+  <!--当网站添加到主屏幕快速启动方式，将网站添加到主屏幕快速启动方式-->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <!--隐藏ios上的浏览器地址栏-->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <!-- UC默认竖屏 ，UC强制全屏 -->
+  <meta name="full-screen" content="yes">
+  <meta name="browsermode" content="application">
+  <!-- QQ强制竖屏 QQ强制全屏 -->
+  <meta name="x5-orientation" content="portrait">
+  <meta name="x5-fullscreen" content="true">
+  <meta name="x5-page-mode" content="app">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <title>系统</title>
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=NzSQK1xpVQZEnaW4riGvP0Ik"></script>
+</head>
+
+<body>
+  <div id="app" class="vc-page"></div>
+  <!-- built files will be auto injected -->
+  <%=htmlWebpackPlugin.files.webpackManifest%>
+    <script src="//cdn.bootcss.com/vue/2.5.2/vue.min.js"></script>
+    <script src="//cdn.bootcss.com/vue-router/3.0.1/vue-router.min.js"></script>
+    <script src="//cdn.bootcss.com/vuex/3.0.1/vuex.min.js"></script>
+    <script src="//cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
+</body>
+
+
+</html>
