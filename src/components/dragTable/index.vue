@@ -8,7 +8,7 @@
       </header>
       <section class="drag-table-section" :style="{'maxHeight': uiSettings.contentMaxHeight+'px'}">
         <ul class="name-box" :style="{'transform': 'translate(0,'+uiSettings.tableSiderTop+')'}">
-          <li class="name-item" :class="{'actived': $roomTypeIndex==actived.y}" v-for="(roomType, $roomTypeIndex) in dataList" :key="$roomTypeIndex">
+          <li v-if="dataList.length" class="name-item" :class="{'actived': $roomTypeIndex==actived.y}" v-for="(roomType, $roomTypeIndex) in dataList" :key="$roomTypeIndex">
             <slot name="left" :data="roomType"></slot>
           </li>
         </ul>
@@ -18,30 +18,30 @@
       <header>
         <div class="border-bottom">
           <div class="box-center text-center">
-            操作
+            {{actionTitle}}
           </div>
         </div>
       </header>
       <section class="drag-table-section" :style="{'maxHeight': uiSettings.contentMaxHeight+'px'}">
         <ul class="name-box" :style="{'transform': 'translate(0,'+uiSettings.tableSiderTop+')'}">
-          <li class="name-item" v-for="(roomType, $roomTypeIndex) in dataList" :key="$roomTypeIndex">
-            <slot name="middle-section" :data="date"></slot>
+          <li v-if="dataList.length" class="name-item" v-for="(roomType, $roomTypeIndex) in dataList" :key="$roomTypeIndex">
+            <slot name="middle-section" :data="roomType"></slot>
           </li>
         </ul>
       </section>
     </div>
     <div class="drag-table-right col-1">
       <header class="drag-table-header" :style="{'transform': 'translate('+uiSettings.tableHeaderLeft+', 0)'}">
-        <ul class="column-box">
+        <ul class="column-box" v-if="dateList.length">
           <li class="column-item" :class="{'actived': $dateIndex==actived.x}" v-for="(date, $dateIndex) in dateList" :key="$dateIndex">
             <slot name="right-header" :data="date"></slot>
           </li>
         </ul>
       </header>
       <section class="table-body drag-table-section" ref="tableBody" :style="{'maxHeight': uiSettings.contentMaxHeight+'px'}">
-        <div class="item-box" v-for="(roomType, $roomTypeIndex) in dataList" :key="$roomTypeIndex">
+        <div v-if="dataList.length" class="item-box" v-for="(roomType, $roomTypeIndex) in dataList" :key="$roomTypeIndex">
           <ul class="column-box">
-            <li class="column-item" :class="{'actived': $roomIndex==actived.x && $roomTypeIndex == actived.y}" v-for="(room, $roomIndex) in roomType.list" :key="$roomIndex" @mouseenter="itemEnter($roomIndex,$roomTypeIndex)" @mouseleave="itemLeave($roomIndex,$roomTypeIndex)">
+            <li class="column-item" :class="{'actived': $roomIndex==actived.x && $roomTypeIndex == actived.y}" v-for="(room, $roomIndex) in roomType.roomDetail" :key="$roomIndex" @mouseenter="itemEnter($roomIndex,$roomTypeIndex)" @mouseleave="itemLeave($roomIndex,$roomTypeIndex)">
               <slot name="right-section" :data="room"></slot>
             </li>
           </ul>
@@ -56,7 +56,7 @@ import { DateInlinePicker } from "@/components";
 
 export default {
   props: {
-    defaultDate: {
+    startDate: {
       type: Date
     },
     dateList: {
@@ -74,11 +74,15 @@ export default {
     displayAction: {
       type: Boolean,
       default: false
+    },
+    actionTitle:{
+      type: String,
+      default: '操作'
     }
   },
   data() {
     return {
-      date: this.defaultDate,
+      date: this.startDate,
       uiSettings: {
         contentMaxHeight: 600,
         tableHeaderLeft: 0,
@@ -92,16 +96,15 @@ export default {
   },
   watch: {
     date() {
+      this.resetScrollPosition();
       this.$emit("change", this.date);
-    },
-    defaultDate() {
-      this.initDefaultDate();
     }
   },
   components: {
     DateInlinePicker
   },
   methods: {
+    // 获取当前时间
     getCurDate(date) {
       let now = date || new Date();
       return new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -109,7 +112,6 @@ export default {
     // 计算滑动位置
     calcScroll(e) {
       var $target = e.target;
-      //   console.log($target);
       this.uiSettings.tableHeaderLeft = "-" + $target.scrollLeft + "px";
       this.uiSettings.tableSiderTop = "-" + $target.scrollTop + "px";
     },
@@ -120,28 +122,27 @@ export default {
       this.$refs.tableBody.scrollTop = 0;
       this.$refs.tableBody.scrollLeft = 0;
     },
+    // item项的鼠标进入事件
     itemEnter(x, y) {
       this.actived = {
         x,
         y
       };
     },
+    // item项的鼠标移出事件
     itemLeave(x, y) {
       this.actived = {
         x: -1,
         y: -1
       };
-    },
-    initDefaultDate() {
-      this.date = this.getCurDate(this.defaultDate);
     }
   },
-  mounted() {
-    this.initDefaultDate();
+  beforeMount() {
     this.$nextTick(() => {
       this.$refs.tableBody.onscroll = this.calcScroll;
     });
-  }
+  },
+  mounted() {}
 };
 </script>
 
@@ -206,7 +207,7 @@ export default {
       display: inline-block;
       border-bottom: 1px solid @color_gray;
       &.actived {
-        background-color: #eae8e4;
+        background-color: #fdf5e6;
       }
       + .column-item {
         border-left: 1px solid @color_gray;
@@ -221,7 +222,7 @@ export default {
       box-sizing: border-box;
       border-bottom: 1px solid @color_gray;
       &.actived {
-        background-color: #eae8e4;
+        background-color: #fdf5e6;
       }
       + .name-item {
         /* border-top: 1px solid @color_gray; */

@@ -7,12 +7,15 @@
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "build": "node build/build.js",
+    "development": "export NODE_ENV=development && node build/build.js",
+    "staging": "export NODE_ENV=staging && node build/build.js",
+    "production": "export NODE_ENV=production && node build/build.js",
     "analyz": "NODE_ENV=production npm_config_report=true npm run build"
   },
   "dependencies": {
     "awe-dnd": "^0.3.1",
     "axios": "^0.18.0",
+    "cropperjs": "^1.4.0",
     "element-ui": "^2.3.8",
     "screenfull": "^3.3.2",
     "vue": "^2.5.2",

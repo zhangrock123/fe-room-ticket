@@ -2,73 +2,49 @@
     <div>
       <ul class="form-box">
         <li class="app-flex app-flex-center">
-          <label>签约经理</label>
-          <el-input v-model="formData.manager" size="small" class="inline width-200"></el-input>
-          <div class="col-1 color-gray marginL-10">
-            <i class="el-icon-warning"></i> 不填写默认显示指定的账号
-          </div>
-        </li>
-        <li class="app-flex app-flex-center">
           <label class="required">合作酒店</label>
-          <el-input @focus="showDialog('selectOptionDialog')" prefix-icon="el-icon-search" v-model="formData.coHotel" class="inline width-200" size="small" readonly clearable placeholder="合作酒店"></el-input>
+          <span v-if="hotelInfo">{{formData.coHotel.name}}</span>
+          <el-input v-else @focus="showDialog('selectOptionDialog')" prefix-icon="el-icon-search" v-model="formData.coHotel.name" class="inline width-250" size="small" readonly placeholder="合作酒店"></el-input>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">酒店名称</label>
-          <el-input v-model="formData.hotelName" class="inline width-200" size="small" clearable placeholder="酒店名称"></el-input>
+          <el-input v-model="formData.hotelName" class="inline width-250" size="small" clearable placeholder="酒店名称"></el-input>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">前台电话</label>
-          <el-input v-model="formData.receptionTel" type="tel" class="inline width-200" size="small" clearable placeholder="前台电话"></el-input>
+          <el-input v-model="formData.receptionTel" type="tel" class="inline width-250" size="small" clearable placeholder="前台电话"></el-input>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">老板手机号</label>
-          <el-input v-model="formData.bossMobile" type="tel" class="inline width-200" size="small" clearable placeholder="老板手机号"></el-input>
+          <el-input v-model="formData.bossMobile" type="tel" class="inline width-250" size="small" clearable placeholder="老板手机号"></el-input>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">房间数量</label>
-          <el-input v-model="formData.roomCount" type="number" class="inline width-200" size="small" clearable placeholder="房间数量"></el-input>
+          <el-input v-model="formData.roomCount" type="number" class="inline width-250" size="small" clearable placeholder="房间数量"></el-input>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">开业年份</label>
-          <el-date-picker class="width-200" v-model="formData.openYear" type="year" size="small" placeholder="选择日期"></el-date-picker>
+          <el-date-picker class="width-250" v-model="formData.openYear" type="year" size="small" placeholder="选择年份"></el-date-picker>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">装修年份</label>
-          <el-date-picker class="width-200" v-model="formData.decorationYear" type="year" size="small" placeholder="选择日期"></el-date-picker>
+          <el-date-picker class="width-250" v-model="formData.decorationYear" type="year" size="small" placeholder="选择年份"></el-date-picker>
         </li>
         <li class="app-flex">
           <label class="required">酒店简介</label>
           <div class="col-1">
-            <el-input v-model="formData.hotelInfo" type="textarea" rows="5" resize="none" placeholder="酒店简介"></el-input>
+            <el-input v-model="formData.introduction" type="textarea" rows="5" resize="none" placeholder="酒店简介"></el-input>
           </div>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">详细地址</label>
           <div class="col-1">
-            <el-select class="width-150" size="small" @change="provinceChange" v-model="formData.provinceCode" filterable placeholder="省">
-                <el-option
-                v-for="(item,$index) in option.provinceList"
-                :key="$index"
-                :label="item.provinceName"
-                :value="item.provinceCode">
-                </el-option>
-            </el-select>
-            <el-select class="width-150" size="small" @change="cityChange" v-model="formData.cityCode" filterable placeholder="市">
-                <el-option
-                v-for="(item,$index) in option.cityList"
-                :key="$index"
-                :label="item.cityName"
-                :value="item.cityCode">
-                </el-option>
-            </el-select>
-            <el-select class="width-150" size="small" @change="areaChange" v-model="formData.areaCode" filterable placeholder="区">
-                <el-option
-                v-for="(item,$index) in option.areaList"
-                :key="$index"
-                :label="item.areaName"
-                :value="item.areaCode">
-                </el-option>
-            </el-select>
+            <geo-option
+              :province-code="formData.provinceCode"
+              :city-code="formData.cityCode"
+              :area-code="formData.areaCode"
+              @change="geoChange"
+              @updated="geoUpdated"></geo-option>
             <el-input class="inline width-200" size="small" v-model="formData.addressInfo" placeholder="街道"></el-input>
             <el-button size="mini" type="success" @click="searchMap">
               <i class="icon-search"></i> 搜索标注
@@ -78,12 +54,15 @@
         <li class="app-flex">
           <label>地图标识</label>
           <div class="col-1">
-            <baidu-map ref="baiduMap" v-model="mapLatLon"></baidu-map>
+            <baidu-map :is-init="!hotelInfo" ref="baiduMap" v-model="mapLatLon"></baidu-map>
           </div>
         </li>
         <li class="app-flex app-flex-center">
           <label class="required">目的地</label>
-          <el-select class="inline width-200" size="small" v-model="formData.destinationCode" filterable placeholder="请选择">
+          <el-select class="inline width-150" size="small" v-model="formData.destinationCode" filterable placeholder="请选择">
+              <div slot="prefix" class="search">
+                <i class=" box-center el-icon-search v-center"></i>
+              </div>
               <el-option
                 v-for="(item,$index) in option.destinationList"
                 :key="$index"
@@ -92,10 +71,11 @@
               </el-option>
           </el-select>
         </li>
-        <li class="app-flex">
+        <li class="app-flex" v-if="hotelInfo && hotelInfo.fisId">
           <label>酒店照片</label>
           <div class="col-1">
             <div class="hotel-cover-box" @click="showDialog('imageUploadDialog')">
+              <div class="coverImg" :style="{'backgroundImage': `url(${imgCover})`}"></div>
               <div class="mask">
                 <span class="box-center text-center color-slightGray">
                   <i class="el-icon-edit-outline font-40"></i>
@@ -106,274 +86,239 @@
           </div>
         </li>
         <li class="app-flex">
-          <label>酒店设施</label>
+          <label class="required">酒店设施</label>
           <div class="col-1">
-            <el-row>
-              <el-col :span="4" v-for="(facility, $facilityIndex) in option.facilityList" :key="$facilityIndex">
-                <el-checkbox v-model="facility.checked">
-                  <div class="font-12">{{facility.name}}</div>
-                </el-checkbox>
-              </el-col>
-            </el-row>
+            <el-checkbox-group class="row row-5 font-12" v-model="formData.facilityList">
+              <el-checkbox v-for="(facility, $facilityIndex) in option.facilityList" :key="$facilityIndex" :label="facility.value*1">{{facility.name}}</el-checkbox>
+            </el-checkbox-group>
           </div>
         </li>
       </ul>
       <footer class="text-center marginT-10">
-        <el-button size="small" type="success" @click="saveData">
+        <el-button size="small" type="success" @click="confirmSubmit">
           <div class="paddingLR-10">保存</div>
         </el-button>
       </footer>
-      <select-option-dialog @change="changeCoHotel" :column="dialog.optionColumn" title="选择合作酒店" ref="selectOptionDialog"></select-option-dialog>
-      <image-upload-dialog title="酒店风光" v-model="formData.imageList" ref="imageUploadDialog"></image-upload-dialog>
+      <select-option-dialog
+        @change="changeCoHotel"
+        placeholder="输入酒店名称/psd编码"
+        :column="dialog.optionColumn"
+        :api-service="dialog.apiService"
+        :keyword-column="dialog.keywordColumn"
+        title="选择合作酒店"
+        ref="selectOptionDialog">
+      </select-option-dialog>
+      <image-upload-dialog @update="updateImg" title="酒店风光" v-model="formData.imageList" :room-type-data="{}" :hotel-info="hotelInfo" :type="1" ref="imageUploadDialog"></image-upload-dialog>
     </div>
 </template>
 
 <script>
-import { SelectOptionDialog, ImageUploadDialog, BaiduMap } from "@/components";
+import {
+  SelectOptionDialog,
+  ImageUploadDialog,
+  BaiduMap,
+  GeoOption
+} from "@/components";
+import formatter from "./hotelInfo.formatter.js";
 import service from "@/service";
 import utils from "@/utils";
+import { mapActions } from "vuex";
 
 export default {
+  props: {
+    hotelInfo: {
+      type: Object
+    }
+  },
   data() {
     return {
       // 填写数据信息
       formData: {
-        manager: "",
-        coHotel: "",
+        coHotel: {},
         hotelName: "",
         receptionTel: "",
         bossMobile: "",
         roomCount: "",
         openYear: "",
         decorationYear: "",
-        hotelInfo: "",
-        provinceCode: "", // 省份
-        cityCode: "", // 城市
-        areaCode: "", // 地区
+        introduction: "",
         addressInfo: "", // 街道
         destinationCode: "", // 目的地
-        imageList: []
+        imageList: [],
+        provinceCode: "",
+        cityCode: "",
+        areaCode: "",
+        geoInfo: {}, // 省市区数据
+        facilityList: []
       },
       // 选项数据
       option: {
-        provinceList: [],
-        cityList: [],
-        areaList: [],
         destinationList: [],
         facilityList: []
       },
       mapLatLon: [121.7, 31.19],
       // 弹窗数据
       dialog: {
-        optionColumn: [
-          {
-            title: "酒店id",
-            column: "id"
-          },
-          {
-            title: "名称",
-            column: "name"
-          }
-        ]
+        optionColumn: [],
+        apiService: null
       }
     };
+  },
+  computed: {
+    imgCover() {
+      let res = "";
+      this.formData.imageList.length &&
+        (res = this.formData.imageList[0].imgUrl);
+      return res;
+    }
   },
   components: {
     SelectOptionDialog,
     ImageUploadDialog,
-    BaiduMap
+    BaiduMap,
+    GeoOption
   },
   methods: {
+    ...mapActions(["getDictOptionAction", "getDestinationOptionAction"]),
+
+    // 省市区值改变事件
+    geoChange(geoInfo) {
+      this.geoUpdated(geoInfo);
+      this.searchMap();
+    },
+    // 更新省市区信息回调事件
+    geoUpdated(geoInfo) {
+      this.formData.geoInfo = geoInfo;
+    },
     // 弹框数据回调
     changeCoHotel(option) {
-      this.formData.coHotel = option.name;
-    },
-    /**
-     * 基础数据获取方法
-     * settings 可配置参数如下：
-     *  serviceName 调用服务接口名
-     *  param 调用接口传参
-     *  optionName option中指定的key值
-     *  resColumnName 返回数据中的key值
-     *  isUseCache 是否使用缓存
-     *  failMsg 接口请求失败显示的提示
-     *  expr 自定义赋值方法
-     */
-    _baseQuery(settings) {
-      let vm = this;
-      !!settings.loading && this.$loading.open();
-      return new Promise(resolve => {
-        if (!!settings.isUseCache) {
-          this.option[settings.optionName] =
-            utils.getStore(settings.optionName) || [];
-          if (this.option[settings.optionName].length) {
-            !!settings.loading && vm.$loading.close();
-            return resolve();
-          }
+      this.formData.coHotel = option;
+      service.getCooperationHotelDetail({ hotelId: option.id }).then(res => {
+        if (res.success) {
+          this.initCoHotel(res.data.data);
         }
-        service[settings.serviceName](settings.param || {})
-          .then(res => {
-            if (res.data && res.data.status == 200) {
-              if (settings.expr) {
-                settings.expr(res);
-              } else {
-                this.option[settings.optionName] =
-                  res.data[settings.resColumnName];
-                if (!!settings.isUseCache) {
-                  utils.setStore(
-                    settings.optionName,
-                    this.option[settings.optionName]
-                  );
-                }
-              }
-            } else {
-              this.$message.warning(settings.failMsg || "获取数据失败！");
-            }
-          })
-          .finally(() => {
-            !!settings.loading && vm.$loading.close();
-            resolve();
-          });
       });
     },
-    // 获取省市区信息数据
-    initProvinceListOption() {
-      return this._baseQuery({
-        serviceName: "getReginData",
-        isUseCache: true,
-        optionName: "provinceList",
-        resColumnName: "result",
-        failMsg: "获取省市区数据失败！"
-      });
+    // 根据所选的合作酒店进行数据初始化
+    initCoHotel(data) {
+      this.formData = formatter.FormatterCooperationHotelData(
+        data,
+        this.formData
+      );
+      this.mapLatLon = [data.baiduLon, data.baiduLat];
+      this.$refs.baiduMap.search(this.mapLatLon);
     },
     // 获取目的地数据
     initDestinationListOption() {
-      return this._baseQuery({
-        serviceName: "getDesitionData",
-        isUseCache: true,
-        optionName: "destinationList",
-        resColumnName: "result",
-        failMsg: "获取目的地数据失败！"
+      return new Promise(resolve => {
+        this.getDestinationOptionAction()
+          .then(
+            res => {
+              this.option.destinationList = res;
+            },
+            () => {
+              this.$message.warning("获取目的地数据失败！");
+            }
+          )
+          .finally(resolve);
       });
     },
     // 获取酒店设施信息以及缓存用于其他选项的数据
     initFacilityOption() {
-      let vm = this;
-      this._baseQuery({
-        serviceName: "getDictionaryData",
-        isUseCache: true,
-        optionName: "facilityList",
-        failMsg: "获取酒店设施数据失败！",
-        expr(res) {
-          res.data.list &&
-            res.data.list.forEach(v => {
-              if (v.conType == "facilities") {
-                vm.option.facilityList = v.dic;
-              }
-              // 缓存相应配置数据
-              utils.setStore(v.conType, v.dic);
-            });
-        }
+      return new Promise(resolve => {
+        this.getDictOptionAction({ optionName: "facilities" })
+          .then(
+            res => {
+              this.option.facilityList = res;
+            },
+            () => {
+              this.$message.warning("获取酒店设施数据失败！");
+            }
+          )
+          .finally(resolve);
       });
-    },
-    // 省份下拉框change事件
-    provinceChange() {
-      this.option.cityList = [];
-      this.formData.cityCode = "";
-      this.option.areaList = [];
-      this.formData.areaCode = "";
-      let curProvinceData = this.option.provinceList.filter(v => {
-        return v.provinceCode == this.formData.provinceCode;
-      });
-      this.option.cityList = curProvinceData[0].omsCityVoList;
-      this.searchMap();
-    },
-    // 城市下拉框change事件
-    cityChange() {
-      this.option.areaList = [];
-      this.formData.areaCode = "";
-      let curCityData = this.option.cityList.filter(v => {
-        return v.cityCode == this.formData.cityCode;
-      });
-      this.option.areaList = curCityData[0].areaVoList;
-      this.searchMap();
-    },
-    // 区域下拉框change事件
-    areaChange() {
-      this.searchMap();
-    },
-    // 根据当前选择的code信息，获取选择的省市区的名称
-    getGeoNameByCode(type, code) {
-      let dictConfig = {
-        province: {
-          option: "provinceList",
-          name: "provinceName",
-          code: "provinceCode"
-        },
-        city: {
-          option: "cityList",
-          name: "cityName",
-          code: "cityCode"
-        },
-        area: {
-          option: "areaList",
-          name: "areaName",
-          code: "areaCode"
-        }
-      }[type];
-      let typeName = "";
-      dictConfig &&
-        this.option[dictConfig.option].some(v => {
-          if (v[dictConfig.code] == code) {
-            return (typeName = v[dictConfig.name]);
-          }
-        });
-      return typeName;
     },
     // 点击显示dialog
     showDialog(refName) {
       this.$refs[refName].showDialog();
     },
+    // 提示和输入项判断，之后执行提交保存
+    confirmSubmit() {
+      let checkParamStatus = formatter.CheckParamStatus(this.formData);
+      if (!checkParamStatus.status) {
+        return this.$message.warning(checkParamStatus.msg);
+      }
+      let param;
+      this.$confirm("是否确认保存酒店资料？", "提示", {
+        type: "warning"
+      }).then(res => {
+        this.submit();
+      });
+    },
     // 数据保存
-    saveData() {
-      console.log(this.mapLatLon);
+    submit() {
+      let param = formatter.FormatterSubmitData(
+        this.formData,
+        this.mapLatLon,
+        this.hotelInfo
+      );
+      let vm = this;
+      return this.$root.commonCall("createOrUpdateHotelInfo", param, {
+        success(res) {
+          vm.$message.success("保存酒店信息成功！");
+          if (vm.hotelInfo) {
+            vm.$emit("refresh");
+          } else {
+            vm.$router.push({ name: "index" });
+          }
+        },
+        failMsg: "保存信息失败！"
+      });
+    },
+    // 图片信息排序保存
+    updateImg(imgList) {
+      this.formData.imageList = imgList;
+      // this.hotelInfo.fisId && this.submit();
     },
     // 初始化信息
     initData() {
       return Promise.all([
-        this.initProvinceListOption(),
         this.initDestinationListOption(),
         this.initFacilityOption()
       ]);
     },
     // 百度地图搜索
     searchMap() {
-      let provinceName = this.getGeoNameByCode(
-        "province",
-        this.formData.provinceCode
-      );
-      let cityName = this.getGeoNameByCode("city", this.formData.cityCode);
-      let areaName = this.getGeoNameByCode("area", this.formData.areaCode);
-      let addressInfo = this.formData.addressInfo;
-      let searchKeyword = "";
-      provinceName && (searchKeyword += provinceName);
-      provinceName && cityName && (searchKeyword += cityName);
-      provinceName && cityName && areaName && (searchKeyword += areaName);
-      provinceName &&
-        cityName &&
-        areaName &&
-        addressInfo &&
-        (searchKeyword += addressInfo);
-      if (!searchKeyword) {
+      let searchKeyword = formatter.FormatterSearchMapData(this.formData);
+      searchKeyword && this.$refs.baiduMap.search(searchKeyword);
+    },
+    // 对话框初始化
+    initDialogSettings() {
+      this.dialog = {
+        optionColumn: formatter.FormatterOptionDialogColumn(),
+        keywordColumn: "nameOrPsb",
+        apiService: service.getCooperationHotelList
+      };
+    },
+    // 初始化默认数据
+    initDefaultData() {
+      if (!this.hotelInfo) {
         return;
       }
-      this.$refs.baiduMap.search(searchKeyword);
+      this.formData = formatter.FormatterDefaultHotelData(this.hotelInfo);
+      this.mapLatLon = [this.hotelInfo.baiduLon, this.hotelInfo.baiduLat];
+      setTimeout(() => {
+        this.$refs.baiduMap && this.$refs.baiduMap.search(this.mapLatLon);
+      }, 300);
     }
   },
   mounted() {
     this.$loading.open();
     this.initData()
-      .then(() => {})
+      .then(() => {
+        this.initDialogSettings();
+        this.initDefaultData();
+      })
       .finally(() => {
         this.$loading.close();
       });
@@ -396,6 +341,9 @@ export default {
       height: 200px;
       border: 1px solid #eee;
       position: relative;
+      .coverImg {
+        height: 100%;
+      }
       .mask {
         position: absolute;
         left: 0;

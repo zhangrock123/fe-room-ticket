@@ -13,10 +13,10 @@
           <th>操作</th>
         </tr>
       </thead>
-      <tbody>
-        <tr v-for="(roomType, $roomTypeIndex) in roomTypeList" :key="$roomTypeIndex">
+      <tbody v-if="roomTypeData.offline && roomTypeData.offline.length">
+        <tr v-for="(roomType, $roomTypeIndex) in roomTypeData.offline" :key="$roomTypeIndex">
           <td>
-            {{roomType.name}}
+            {{roomType.roomTypeName}}
           </td>
           <td>
             <el-button class="no-padding" size="mini" plain @click="onlineRoomType(roomType)">
@@ -25,38 +25,45 @@
           </td>
         </tr>
       </tbody>
+      <tbody v-else>
+        <tr>
+          <td colspan="2">暂无房型数据！</td>
+        </tr>
+      </tbody>
     </table>
-    <online-room-type-dialog ref="onlineRoomTypeDialog"></online-room-type-dialog>
+    <online-room-type-dialog :hotel-info="hotelInfo" :room-type-info="roomTypeData" @refresh="refreshRoomType" ref="onlineRoomTypeDialog"></online-room-type-dialog>
   </div>
 </template>
 
 <script>
 import { OnlineRoomTypeDialog } from "@/components";
 export default {
+  props: {
+    hotelInfo: {
+      type: Object,
+      required: true
+    },
+    roomTypeData: {
+      type: Object,
+      default() {
+        return {};
+      }
+    }
+  },
   data() {
     return {
-      roomTypeList: [
-        {
-          id: 1,
-          name: "大床房"
-        },
-        {
-          id: 2,
-          name: "标准间"
-        },
-        {
-          id: 3,
-          name: "豪华大床房"
-        }
-      ]
+      checkedRoomType: {}
     };
   },
   components: {
     OnlineRoomTypeDialog
   },
   methods: {
-    onlineRoomType() {
-      this.$refs.onlineRoomTypeDialog.showDialog();
+    onlineRoomType(roomType) {
+      this.$refs.onlineRoomTypeDialog.showDialog(roomType);
+    },
+    refreshRoomType() {
+      this.$emit("refresh");
     }
   }
 };

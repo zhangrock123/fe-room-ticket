@@ -1,5 +1,5 @@
-# fe-room-ticket
-房券系统
+# upp-web
+web版本
 
 ---
 ### 技术栈
@@ -56,4 +56,10 @@
   运行 ``npm start`` 或 ``npm run dev``
 
 ### 项目编译发布
-  运行 ``npm run production``，``/dist`` 文件夹中的文件用于发布
+  运行 （测试环境） ``npm run development``，``/dist`` 文件夹中的文件用于发布（测试环境）
+
+  运行 （模拟环境） ``npm run staging``，``/dist`` 文件夹中的文件用于发布（模拟环境）
+
+  运行 （正式环境） ``npm run production``，``/dist`` 文件夹中的文件用于发布（正式环境）
+
+

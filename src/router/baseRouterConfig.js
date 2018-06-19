@@ -1,9 +1,10 @@
 const INDEX = r => require.ensure([], () => r(require('@/pages/index.vue')), 'index');
-const ROOM_COUNT = r => require.ensure([], () => r(require('@/pages/roomCount.vue')), 'index');
-const ROOM_PRICE = r => require.ensure([], () => r(require('@/pages/roomPrice.vue')), 'index');
+const ROOM_COUNT = r => require.ensure([], () => r(require('@/pages/roomCount.vue')), 'roomCount');
+const ROOM_PRICE = r => require.ensure([], () => r(require('@/pages/roomPrice.vue')), 'roomPrice');
 const ORDER = r => require.ensure([], () => r(require('@/pages/order.vue')), 'order');
 const LOGIN = r => require.ensure([], () => r(require('@/pages/login.vue')), 'login');
 const HOTEL_MANAGEMENT = r => require.ensure([], () => r(require('@/pages/hotelManagement.vue')), 'hotelMangement');
+const ORDER_HISTORY = r => require.ensure([], () => r(require('@/pages/orderHistory.vue')), 'orderHistory');
 
 
 /**
@@ -34,7 +35,7 @@ export default [
   },
   // 房量管理
   {
-    path: '/room-count',
+    path: '/room-count/:innId/:accountId',
     name: 'roomCount',
     meta: {
       auth: true,
@@ -46,7 +47,7 @@ export default [
   },
   // 房价管理
   {
-    path: '/room-price',
+    path: '/room-price/:innId/:accountId',
     name: 'roomPrice',
     meta: {
       auth: true,
@@ -56,6 +57,7 @@ export default [
     },
     component: ROOM_PRICE
   },
+  // 订单管理
   {
     path: '/order',
     name: 'order',
@@ -67,6 +69,7 @@ export default [
     },
     component: ORDER
   },
+  // 用户登录
   {
     path: '/login',
     name: 'login',
@@ -82,6 +85,7 @@ export default [
     path: '/hotel-management',
     redirect: { name: 'hotelManagement', params: {component: 'hotel-info'} }
   },
+  // 酒店管理（新增）
   {
     path: '/hotel-management/:component',
     name: 'hotelManagement',
@@ -92,5 +96,29 @@ export default [
       menuTag: 'hotel'
     },
     component: HOTEL_MANAGEMENT
+  },
+  // 酒店管理（编辑）
+  {
+    path: '/hotel-management/:id/:component',
+    name: 'editHotelManagement',
+    meta: {
+      auth: true,
+      title: '酒店管理',
+      template: 'appLayout',
+      menuTag: 'hotel'
+    },
+    component: HOTEL_MANAGEMENT
+  },
+  // 下载中心
+  {
+    path: '/order-history',
+    name: 'orderHistory',
+    meta: {
+      auth: true,
+      title: '下载中心',
+      template: 'appLayout',
+      menuTag: 'order'
+    },
+    component: ORDER_HISTORY
   }
 ];

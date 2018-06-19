@@ -55,15 +55,16 @@ export default {
         params: this.$route.query.params || "{}"
       },
       loginInfo: {
-        j_username: "admin",
-        j_password: "111111",
+        j_username: "",
+        j_password: "",
         j_captcha: ""
       },
-      verifyImg: ""
+      verifyImg: "",
+      isEnterLogin: false
     };
   },
   methods: {
-    ...mapActions(["setJSSESSIONIDAction", "setUserInfoAction"]),
+    ...mapActions(["setUserInfoAction"]),
     // 参数信息验证
     paramCheck() {
       let res = { status: false, msg: "" };
@@ -80,20 +81,31 @@ export default {
       if (!paramCheck.status) {
         return this.$message.warning(paramCheck.msg);
       }
-      service.doUserLogin({ ...this.loginInfo }).then(res => {
-        if (res.data && res.data.status == "success") {
-          this.setUserInfoAction(res.data.data);
-          this.$router.replace({
-            name: this.redirectInfo.name,
-            query: JSON.parse(this.redirectInfo.query),
-            params: JSON.parse(this.redirectInfo.params)
-          });
-        } else {
-          this.getVerifyImg();
-          this.loginInfo.j_captcha = "";
-          this.$message.warning(res.data.message || "账号或密码错误！");
-        }
-      });
+      this.$loading.open();
+      service
+        .doUserLogin({ ...this.loginInfo })
+        .then(
+          res => {
+            if (res.data && res.data.status == "success") {
+              this.setUserInfoAction(res.data.data);
+              this.$router.replace({
+                name: this.redirectInfo.name,
+                query: JSON.parse(this.redirectInfo.query),
+                params: JSON.parse(this.redirectInfo.params)
+              });
+            } else {
+              this.getVerifyImg();
+              this.loginInfo.j_captcha = "";
+              this.$message.warning(res.data.message || "账号或密码错误！");
+            }
+          },
+          err => {
+            this.$message.error("服务器错误！");
+          }
+        )
+        .finally(() => {
+          this.$loading.close();
+        });
     },
     // 获取JSESSIONID和验证码图片
     getVerifyImg() {
@@ -104,13 +116,12 @@ export default {
           res => {
             if (res.data && res.data.captchaImg && res.data.sessionId) {
               this.verifyImg = res.data.captchaImg;
-              this.setJSSESSIONIDAction(res.data.sessionId);
             } else {
               this.$message.warning("数据获取异常！");
             }
           },
           err => {
-            this.$message.warning("服务器错误！");
+            this.$message.error("服务器错误！");
           }
         )
         .finally(() => {
@@ -119,7 +130,18 @@ export default {
     }
   },
   mounted() {
+    this.isEnterLogin = true;
     this.getVerifyImg();
+    // 添加回车登录事件
+    document.onkeydown = event => {
+      var e = event || window.event || arguments.callee.caller.arguments[0];
+      if (e && e.keyCode == 13) {
+        this.isEnterLogin && this.doLogin();
+      }
+    };
+  },
+  beforeDestroy() {
+    this.isEnterLogin = false;
   }
 };
 </script>
@@ -143,6 +165,9 @@ export default {
     border-radius: 6px;
     > header {
       margin-bottom: 25px;
+      font-size: 20px;
+      color: #666;
+      text-shadow: 0 1px 1px #fff;
     }
     .input-section-box {
       li {

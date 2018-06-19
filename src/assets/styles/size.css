@@ -32,6 +32,10 @@
 
 /* margin */
 
+.marginR-5 {
+  margin-right: 5px;
+}
+
 .marginR-10 {
   margin-right: 10px;
 }
@@ -62,6 +66,9 @@
   margin-bottom: 10px;
 }
 
+.marginB-5{
+  margin-bottom: 5px;
+}
 /* padding */
 
 .paddingB-5 {
@@ -98,23 +105,6 @@
   padding-right: 10px;
 }
 
-/* border */
-
-.borderT {
-  border-top: 1px solid #dedede;
-}
-
-.borderT-dot {
-  border-top: 1px dashed #ccc;
-}
-
-.borderB {
-  border-bottom: 1px solid #dedede;
-}
-
-.borderB-dot {
-  border-bottom: 1px dashed #ccc;
-}
 
 /* width */
 
@@ -146,8 +136,7 @@
   width: 200px !important;
 }
 
-/* height */
-
-.height-300{
-  height:300px;
+.width-250 {
+  width: 250px !important;
 }
+

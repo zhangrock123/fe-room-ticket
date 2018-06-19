@@ -9,22 +9,25 @@
     <table class="table center marginT-10">
       <thead>
         <tr>
-          <th width="50%">房型名称</th>
-          <th width="25%">房间数</th>
-          <th>房券数</th>
+          <th width="60%">房型名称</th>
+          <th>操作</th>
         </tr>
       </thead>
-      <tbody>
-        <tr v-for="(roomType, $roomTypeIndex) in roomTypeList" :key="$roomTypeIndex">
+      <tbody v-if="roomTypeData.online && roomTypeData.online.length">
+        <tr v-for="(roomType, $roomTypeIndex) in roomTypeData.online" :key="$roomTypeIndex">
           <td>
-            {{roomType.name}}
+            {{roomType.roomTypeName}}
           </td>
           <td>
-            {{roomType.count}}
+            <el-button class="no-padding" size="mini" plain disabled="">
+              <span class="font-12">下架房型</span>
+            </el-button>
           </td>
-          <td>
-            {{roomType.coupon}}
-          </td>
+        </tr>
+      </tbody>
+      <tbody v-else>
+        <tr>
+          <td colspan="2">暂无房型数据！</td>
         </tr>
       </tbody>
     </table>
@@ -33,33 +36,22 @@
 
 <script>
 export default {
-  data() {
-    return {
-      roomTypeList: [
-        {
-          id: 1,
-          name: "大床房",
-          count: 10,
-          coupon: 5
-        },
-        {
-          id: 2,
-          name: "标准间",
-          count: 1,
-          coupon: 2
-        },
-        {
-          id: 3,
-          name: "豪华大床房",
-          count: 7,
-          coupon: 3
-        }
-      ]
-    };
+  props: {
+    hotelInfo: {
+      type: Object,
+      required: true
+    },
+    roomTypeData: {
+      type: Object,
+      default() {
+        return {};
+      }
+    }
   },
-  methods: {
-    onlineRoomType() {}
-  }
+  data() {
+    return {};
+  },
+  methods: {}
 };
 </script>
 

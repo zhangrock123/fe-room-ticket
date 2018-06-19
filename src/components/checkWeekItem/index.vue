@@ -7,18 +7,29 @@
 </template>
 <script>
 export default {
+  props: {
+    checkedList: {
+      type: Array
+    }
+  },
   data() {
     return {
       weekOptionList: []
     };
+  },
+  watch: {
+    checkedList() {
+      this.setChecked();
+    }
   },
   methods: {
     // 初始化星期数据
     initWeekOptionList() {
       let weekOptionList = [];
       let weekStr = "一二三四五六日";
-      weekStr.split("").forEach(v => {
+      weekStr.split("").forEach((v, i) => {
         weekOptionList.push({
+          id: i + 1,
           name: `周${v}`,
           checked: false
         });
@@ -29,16 +40,30 @@ export default {
       });
       this.weekOptionList = weekOptionList;
     },
+    // 设置选中星期
+    setChecked() {
+      this.initWeekOptionList();
+      if (this.checkedList && this.checkedList.length) {
+        this.checkedList.forEach(v => {
+          this.weekOptionList.some(opt => {
+            if (opt.id == v) {
+              return (opt.checked = true);
+            }
+          });
+        });
+        if (this.checkedList.length == 7) {
+          this.weekOptionList[0].checked = true;
+        }
+      }
+      this.$emit("change", this.weekOptionList);
+    },
     // 星期数据选中（weekIndex 0 全选/反选 1 单选）
     setWeekChecked(weekIndex) {
       this.weekOptionList[weekIndex].checked = !this.weekOptionList[weekIndex]
         .checked;
       if (weekIndex == 0) {
         this.weekOptionList.forEach((v, i) => {
-          if (!i) {
-            return;
-          }
-          v.checked = this.weekOptionList[0].checked;
+          i && (v.checked = this.weekOptionList[0].checked);
         });
       } else {
         this.weekOptionList[0].checked = !this.weekOptionList.some((v, i) => {
@@ -49,7 +74,7 @@ export default {
     }
   },
   mounted() {
-    this.initWeekOptionList();
+    this.setChecked();
   }
 };
 </script>

@@ -1,27 +1,43 @@
 <template>
   <div class="room-type-box">
-    <header class="font-12">
-      房型信息使用于第三方卖房渠道对时提供的房型相关资料，请确保房信息的真实性、完整！
-    </header>
+    <el-alert
+      title="房型信息使用于第三方卖房渠道对接时提供的房型相关资料，请确保房型信息的真实性、完整性！"
+      type="warning"
+      :closable="false"
+      show-icon>
+    </el-alert>
     <div class="marginTB-10">
       <el-button size="mini" type="success" @click="addNewRoomType">
         <i class="icon-plus-circle"></i> 新建房型
       </el-button>
     </div>
     <section>
-      <div class="room-type-card-box">
+      <div class="room-type-card-box" v-if="roomList.length">
         <div class="room-type-card" v-for="(room, $roomIndex) in roomList" :key="$roomIndex">
-            <room-type-card v-model="roomList[$roomIndex]"></room-type-card>
+            <room-type-card @change="refreshHotelAndGetRoomList" :hotel-info="hotelInfo" :room-data="roomList[$roomIndex]"></room-type-card>
         </div>
       </div>
+      <div v-else class="text-center padding-10 marginT-10 color-gray font-12">
+        <i class="el-icon-warning font-12"></i>
+        暂无房型信息，请“
+        <el-button type="text"  @click="addNewRoomType">
+          <span class="font-12">新建房型</span>
+        </el-button>”
+      </div>
     </section>
-    <edit-room-type-dialog ref="editRoomTypeDialog"></edit-room-type-dialog>
+    <edit-room-type-dialog :hotel-id="hotelInfo.fisId" @change="refreshHotelAndGetRoomList" title="新增房型" ref="editRoomTypeDialog"></edit-room-type-dialog>
   </div>
 </template>
 
 <script>
 import { RoomTypeCard, EditRoomTypeDialog } from "@/components";
+
 export default {
+  props: {
+    hotelInfo: {
+      type: Object
+    }
+  },
   data() {
     return {
       roomList: []
@@ -32,34 +48,41 @@ export default {
     EditRoomTypeDialog
   },
   methods: {
+    // 新建房型
     addNewRoomType() {
-      console.log("addNewRoomType");
       this.$refs.editRoomTypeDialog.showDialog();
     },
+    // 获取房型数据
     getRoomList() {
-      this.roomList = [
+      let vm = this;
+      return this.$root.commonCall(
+        "getHotelRoomTypeList",
+        { hotelId: vm.hotelInfo.fisId },
         {
-          id: 1
-        },
-        {
-          id: 2
+          success(res) {
+            let roomList = res.data.data || [];
+            roomList.forEach(v => {
+              v.imgList = v.imgList || [];
+            });
+            vm.roomList = roomList;
+          },
+          failMsg: "获取房型数据失败！"
         }
-      ];
+      );
+    },
+    refreshHotelAndGetRoomList() {
+      this.$emit("refresh", () => {
+        this.getRoomList();
+      });
     }
   },
-  mounted() {
+  beforeMount() {
     this.getRoomList();
-  }
+  },
+  mounted() {}
 };
 </script>
 <style lang="less" scoped>
-.room-type-box {
-  > header {
-    padding: 8px 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
-  }
-}
 .room-type-card-box:after {
   content: "";
   display: block;
@@ -69,7 +92,7 @@ export default {
 }
 .room-type-card {
   width: 280px;
-  height: 400px;
+  height: 420px;
   float: left;
   margin-right: 15px;
   margin-bottom: 15px;

@@ -7,9 +7,10 @@ let getAuthStatus = () => {
     isLogin: true,      // 是否已登陆
     isValidCode: true   // 是否需要拿取code
   };
-  // 没有JSESSIONID，重新登录
-  let JSESSIONID = utils.getCookie("JSESSIONID");
-  if (!JSESSIONID) {
+  // 没有userName+userCode，重新登录
+  let userName = utils.getCookie("userName");
+  let userCode = utils.getCookie('userCode');
+  if (!userName || !userCode) {
     authRes.isLogin = false;
     return authRes;
   }
@@ -39,8 +40,9 @@ export default (vueRouter, to, from, next) => {
   document.getElementsByTagName('title')[0].innerHTML = to && to.meta && to.meta.title ? to.meta.title : '系统';
 
   if (to.meta.auth) {
-    return next(); // 调试之用
+    // return next(); // 调试之用
     let authStatus = getAuthStatus();
+    // console.log(authStatus)
     // 是否需要登录
     if (!authStatus.isLogin) {
       return store.dispatch('doUserLoginoutAction').then(() => {

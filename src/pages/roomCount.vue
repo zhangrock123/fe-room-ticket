@@ -4,24 +4,36 @@
       <el-breadcrumb-item :to="{ path: '/index' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>房量管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <header>
-      <el-button size="mini" type="success" @click="editRoomCount">
-        批量修改房量
-      </el-button>
-      <el-button size="mini" type="success" @click="openCloseRoom">
-        批量关房
+    <header v-if="roomTypeList.length">
+      <el-button size="mini" type="success" @click="multipleOpenCloseRoom">
+        批量开关房
       </el-button>
     </header>
-    <section class="marginT-10">
+    <section class="marginT-10" v-if="roomTypeList.length">
+      <el-alert
+        title="说明：格子中的数字或文字为剩余房量或售卖状态 操作：1､单击房型日期对应的格子可以直接开关房 2､点击批量开关房可一次性修改多间房销售状态"
+        type="warning"
+        :closable="false"
+        class="marginB-10 font-12">
+      </el-alert>
       <drag-table
         :day-range="prevNextDayRange"
-        :default-date="date"
+        :start-date="date"
         :date-list="dateList"
         :data-list="roomTypeList"
+        action-title="修改房券"
+        display-action
         @change="dateChange">
         <template slot="left" slot-scope="scope">
           <div class="box-center text-center">
             {{scope.data.roomTypeName}}
+          </div>
+        </template>
+        <template slot="middle-section" slot-scope="scope">
+          <div class="item-full pointer" @click="editRoomCount(scope.data)">
+            <div class="box-center text-center">
+              <el-button type="text">{{scope.data.ticketNumber || 0}}</el-button>
+            </div>
           </div>
         </template>
         <template slot="right-header" slot-scope="scope">
@@ -31,17 +43,25 @@
           </div>
         </template>
         <template slot="right-section" slot-scope="scope">
-          <div class="item-full" @click="showRight(scope.data)">
+          <div class="item-full pointer" :class="{'status-stop': scope.data.statusValue==1 || scope.data.statusValue==3, 'status-no-sale': scope.data.statusValue==2}" @click="openCloseRoom(scope.data)">
             <div class="box-center text-center" >
-              <header>{{scope.data.status}}</header>
-              <section>{{scope.data.count}}</section>
+              {{scope.data.statusLabel || scope.data.roomNum}}
             </div>
           </div>
         </template>
       </drag-table>
     </section>
-    <open-close-room-dialog :option="roomTypeOption" ref="openCloseRoomDialog"></open-close-room-dialog>
-    <edit-room-count-dialog :data="roomCountData" ref="editRoomCountDialog"></edit-room-count-dialog>
+    <section class="marginT-10" v-else>
+      <el-alert
+        title="暂无房型信息！"
+        type="info"
+        center
+        :closable="false"
+        show-icon>
+      </el-alert>
+    </section>
+    <open-close-room-dialog @refresh="getRoomTypeInfo" ref="openCloseRoomDialog"></open-close-room-dialog>
+    <edit-room-count-dialog @reset="setRoomTypeTicketNumber" ref="editRoomCountDialog"></edit-room-count-dialog>
   </div>
 </template>
 
@@ -52,15 +72,17 @@ import {
   EditRoomCountDialog
 } from "@/components";
 import WidgetDate from "@/utils/widgetDate";
+import formatter from "./roomCount.formatter";
+
 export default {
   data() {
     return {
-      date: this.getCurDate(),
+      innId: "",
+      accountId: "",
+      date: null,
       dateList: [],
       roomTypeList: [],
-      prevNextDayRange: 20,
-      roomTypeOption: [],
-      roomCountData: []
+      prevNextDayRange: 20
     };
   },
   components: {
@@ -73,86 +95,66 @@ export default {
       let now = date || new Date();
       return new Date(now.getFullYear(), now.getMonth(), now.getDate());
     },
-    testData() {
-      let dateList = [];
-      let curDate = this.date;
-      for (let i = 0; i < this.prevNextDayRange; i++) {
-        curDate = new Date(
-          curDate.setTime(curDate.getTime() + 24 * 60 * 60 * 1000)
-        );
-        dateList.push({
-          date: curDate,
-          dateName: WidgetDate._dateToStr(curDate, "MM月dd日", !true),
-          workDayName: WidgetDate._workDayName(curDate),
-          status: Math.random() * 10 > 5 ? 1 : 0,
-          count: ~~(Math.random() * 10)
-        });
-      }
-      this.dateList = dateList;
-
-      let roomTypeList = [];
-      roomTypeList = [
-        {
-          roomTypeId: 1,
-          roomTypeName: "豪华大床房",
-          list: dateList
+    getRoomTypeInfo() {
+      let vm = this;
+      let tarDate = new Date(
+        this.date.getTime() + 24 * 60 * 60 * 1000 * this.prevNextDayRange
+      );
+      let param = {
+        innId: this.innId,
+        accountId: this.accountId,
+        from: WidgetDate._dateToStr(this.date, "yyyy-MM-dd", true),
+        to: WidgetDate._dateToStr(tarDate, "yyyy-MM-dd", true)
+      };
+      return this.$root.commonCall("getRoomTypeInfo", param, {
+        success(res) {
+          let formatData = formatter.FormatRoomTypeData(res.data.list);
+          vm.roomTypeList = formatData.data;
+          vm.dateList = formatData.date;
         },
-        {
-          roomTypeId: 2,
-          roomTypeName: "标准间",
-          list: dateList
-        }
-      ];
-      roomTypeList = [
-        ...roomTypeList,
-        ...roomTypeList,
-        ...roomTypeList,
-        ...roomTypeList,
-        ...roomTypeList,
-        ...roomTypeList,
-        ...roomTypeList,
-        ...roomTypeList
-      ];
-      this.roomTypeList = roomTypeList;
-      // console.log(roomTypeList);
+        failMsg: "获取房型数据失败！"
+      });
     },
     dateChange(date) {
-      console.log(date);
+      this.date = date;
+      this.getRoomTypeInfo();
     },
-    showRight(data) {
-      console.log(">>>>", data);
+    openCloseRoom(data) {
+      let vm = this;
+      let param = formatter.FormatSingleRoomOpenCloseData(data);
+      return this.$root.commonCall("setRoomTypeOpenStatus", param, {
+        success(res) {
+          vm.$message.success("开关房操作成功！");
+          vm.getRoomTypeInfo();
+        },
+        failMsg: "开关房操作失败！"
+      });
     },
-    openCloseRoom() {
-      this.$refs.openCloseRoomDialog.showDialog();
+    multipleOpenCloseRoom() {
+      this.$refs.openCloseRoomDialog.showDialog(this.roomTypeList);
     },
-    editRoomCount() {
-      this.$refs.editRoomCountDialog.showDialog();
+    editRoomCount(data) {
+      this.$refs.editRoomCountDialog.showDialog(data);
+    },
+    // 更改完房券回调，改写房型的房券数量
+    setRoomTypeTicketNumber(data) {
+      if (this.roomTypeList && this.roomTypeList.length) {
+        this.roomTypeList.some(v => {
+          if (v.roomTypeId == data.roomTypeId) {
+            v.ticketNumber = data.count;
+            return true;
+          }
+        });
+      }
     }
   },
+  beforeMount() {
+    this.date = this.getCurDate();
+    this.innId = this.$route.params.innId;
+    this.accountId = this.$route.params.accountId;
+  },
   mounted() {
-    this.testData();
-    this.roomTypeOption = [
-      {
-        id: 1,
-        name: "豪华大床房-(预付-无早餐)"
-      },
-      {
-        id: 2,
-        name: "标准间-(预付-无早餐)"
-      }
-    ];
-    this.roomCountData = [
-      {
-        id: 1,
-        name: "豪华大床房-(预付-无早餐)",
-        count: 1
-      },
-      {
-        id: 2,
-        name: "标准间-(预付-无早餐)",
-        count: 2
-      }
-    ];
+    this.getRoomTypeInfo();
   }
 };
 </script>
@@ -162,6 +164,16 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
+}
+.status-stop {
+  background-color: #f39c9c;
+  transition: all 0.3s ease;
+}
+.status-no-sale {
+  background-color: #eee;
+  &:hover {
+    background-color: #fdf5e6;
+  }
 }
 </style>
 

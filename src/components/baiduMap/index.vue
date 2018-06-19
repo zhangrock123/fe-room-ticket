@@ -16,6 +16,10 @@ export default {
     height: {
       type: Number,
       default: 300
+    },
+    isInit: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -38,12 +42,20 @@ export default {
       this.renderBaiduMap(fullAddress);
     },
     // 渲染百度地图
-    renderBaiduMap(searchKeyWord) {
+    renderBaiduMap(searchKeyWordOrLonLat) {
       let map = new BMap.Map("baidu-map");
       let mapSearcher = new BMap.LocalSearch(map, {
         renderOptions: { map: map }
       });
-      searchKeyWord && mapSearcher.search(searchKeyWord);
+      let lonLat = this.lonLat;
+      if (searchKeyWordOrLonLat) {
+        if (typeof searchKeyWordOrLonLat == "string") {
+          searchKeyWordOrLonLat && mapSearcher.search(searchKeyWordOrLonLat);
+        } else {
+          this.lonLat = searchKeyWordOrLonLat;
+        }
+      }
+
       let point = new BMap.Point(...this.lonLat); // 创建点坐标
       //设置地图中心
       map.centerAndZoom(point, 13);
@@ -75,13 +87,13 @@ export default {
           [...this.lonLat] = [lngLat.lng, lngLat.lat];
           this.renderBaiduMap();
         } catch (exception) {
-          this.$alert("未查询到该地址，请尝试手动标注！");
+          this.$message.warning("未查询到该地址，请尝试手动标注！");
         }
       });
     }
   },
   mounted() {
-    this.renderBaiduMap();
+    this.isInit && this.renderBaiduMap();
   }
 };
 </script>

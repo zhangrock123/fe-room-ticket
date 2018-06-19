@@ -27,13 +27,19 @@ export default {
       optionList: this.value
     };
   },
+  watch: {
+    value() {
+      this.optionList = this.value;
+      this.checkAll = false;
+    }
+  },
   methods: {
     // 全选
     setCheckAll() {
       this.optionList.forEach(v => {
         v.checked = this.checkAll;
       });
-      this.$emit("input", this.optionList);
+      this.emit();
     },
     // 选择某个
     setChecked() {
@@ -45,7 +51,12 @@ export default {
         }
       });
       this.checkAll = checkAll;
+      this.emit();
+    },
+    emit() {
+      let checkedItems = [...this.optionList.filter(v => v.checked)];
       this.$emit("input", this.optionList);
+      this.$emit("change", checkedItems);
     }
   }
 };

@@ -45,6 +45,23 @@
   }
 }
 
+/* el-input-group */
+.el-input-group{
+  &.select-width-100 .el-select{
+    width: 100px;
+  }
+  &.select-width-120 .el-select{
+    width: 120px;
+  }
+  &.width-300{
+    width: 300px;
+  }
+  .el-input-group__prepend{
+    background-color: #fff;
+  }
+}
+
+/* el-button */
 .el-button{
   +.el-button{
     margin-left: 3px;
@@ -183,4 +200,68 @@
 /* el-tabs */
 .el-tabs--border-card{
   box-shadow: none;
+}
+
+/* el-checkbox-group */
+.el-checkbox-group{
+  &.row{
+    .el-checkbox{
+      margin-left: 0;
+      box-sizing: border-box;
+    }
+    &.row-3 .el-checkbox{
+      width: 33.33333%;
+    }
+    &.row-4 .el-checkbox{
+      width: 25%;
+    }
+    &.row-5 .el-checkbox{
+      width: 20%;
+    }
+  }
+  &.font-12 .el-checkbox *{
+    font-size: 12px;
+  }
+  &.font-14 .el-checkbox *{
+    font-size: 14px;
+  }
+}
+
+/* el-select */
+.el-select{
+  .el-input__prefix{
+    .search{
+      width:20px;
+      position: relative;
+      height: 100%;
+    }
+  }
+}
+
+/* el-message-box */
+.el-message-box{
+  .el-message-box__title{
+    span{
+      font-size: 18px;
+      line-height: 1;
+      color: #303133;
+    }
+  }
+  .el-message-box__message{
+    p{
+      font-size: 14px;
+      color: #606266;
+    }
+  }
+  .el-message-box__headerbtn .el-message-box__close{
+    font-size: 16px;
+  }
+}
+
+.el-alert{
+  &.font-12{
+    .el-alert__title{
+      font-size: 12px;
+    }
+  }
 }

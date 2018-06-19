@@ -4,7 +4,7 @@
       <el-breadcrumb-item :to="{ path: '/index' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>{{breadcrumbName}}</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-tabs v-model="activeTab" type="card" @tab-click="changeTab">
+    <el-tabs v-if="hotelId" v-model="activeTab" type="card" @tab-click="changeTab">
       <el-tab-pane
         v-for="(tab, $tabIndex) in tabList"
         :key="$tabIndex"
@@ -12,7 +12,7 @@
         :name="tab.componentName"></el-tab-pane>
     </el-tabs>
     <div>
-      <component :is="useComponent"></component>
+      <component :is="useComponent" :hotel-info.sync="hotelInfo" @refresh="refreshTabConfig"></component>
     </div>
   </div>
 </template>
@@ -21,12 +21,15 @@
 const HotelInfo = () => import("./hotelManagement/hotelInfo.vue");
 const RoomType = () => import("./hotelManagement/roomType.vue");
 const OnlineOffline = () => import("./hotelManagement/onlineOffline.vue");
+
 export default {
   data() {
     return {
       activeTab: this.$route.params.component || "hotel-info",
       tabList: [],
-      tabConfig: {}
+      tabConfig: {},
+      hotelId: this.$route.params.id || "",
+      hotelInfo: null
     };
   },
   components: {
@@ -58,8 +61,8 @@ export default {
     // tab点击切换事件
     changeTab(tab, event) {
       this.$router.push({
-        name: "hotelManagement",
-        params: { component: this.activeTab }
+        name: "editHotelManagement",
+        params: { id: this.hotelId, component: this.activeTab }
       });
     },
     // 设置tab信息
@@ -75,7 +78,7 @@ export default {
     },
     // 设置tab对应的名称及component
     initTabConfig() {
-      this.tabConfig = {
+      let config = {
         "hotel-info": {
           label: "分销酒店资料",
           component: HotelInfo
@@ -89,11 +92,49 @@ export default {
           component: OnlineOffline
         }
       };
+      let showMenu = { "hotel-info": config["hotel-info"] };
+      if (this.hotelInfo) {
+        showMenu["room-type"] = config["room-type"];
+        if (this.hotelInfo.roomTypeNums * 1) {
+          showMenu["online-offline"] = config["online-offline"];
+        }
+      }
+      this.tabConfig = showMenu;
+      // this.tabConfig=config;
+    },
+    // 获取酒店信息
+    getHotelInfo(callback) {
+      let vm = this;
+      return this.$root.commonCall(
+        "getInnDetail",
+        { hotelId: vm.hotelId },
+        {
+          success(res) {
+            vm.hotelInfo = res.data.data;
+          },
+          failMsg: "获取酒店数据失败！"
+        }
+      );
+    },
+    pageNext(callback) {
+      if (!this.hotelId) {
+        return callback();
+      }
+      this.getHotelInfo().then(callback);
+    },
+    refreshTabConfig(callback) {
+      this.getHotelInfo().then(() => {
+        this.initTabConfig();
+        this.initTabList();
+        callback && callback();
+      });
     }
   },
   mounted() {
-    this.initTabConfig();
-    this.initTabList();
+    this.pageNext(() => {
+      this.initTabConfig();
+      this.initTabList();
+    });
   }
 };
 </script>

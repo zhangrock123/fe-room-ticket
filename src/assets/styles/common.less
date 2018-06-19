@@ -1,9 +1,11 @@
 /* 页面共用样式 */
 
 html, body {
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    user-select: none;
+    /*
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      user-select: none;
+    */
 }
 
 body {
@@ -191,10 +193,13 @@ table.table{
   border: 1px solid #ebeef5;
   border-collapse: collapse;
   &.center{
-    text-align: center;
+    th,td{
+      text-align: center;
+    }
   }
   th,td{
-    padding: 8px 0;
+    text-align: left;
+    padding: 8px 10px;
     border: 1px solid #ebeef5;
   }
   thead tr{
@@ -215,4 +220,9 @@ table.table{
     color: #f00;
     margin-left: 3px;
   }
+}
+
+
+.breakWord{
+  word-break: break-all;
 }

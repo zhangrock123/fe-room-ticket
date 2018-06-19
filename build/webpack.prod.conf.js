@@ -11,7 +11,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
-const env = require('../config/prod.env')
+// const env = require('../config/prod.env')
 
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -31,17 +31,25 @@ const webpackConfig = merge(baseWebpackConfig, {
     'vue': 'Vue',
     'vue-router': 'VueRouter',
     'vuex': 'Vuex',
-    'axios': 'axios'
+    'axios': 'axios',
+    'cropperjs': 'Cropper',
+    'element-ui': 'ELEMENT'
   },
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env
+      'process.env': {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+      }
     }),
     new UglifyJsPlugin({
       uglifyOptions: {
         compress: {
           warnings: false
+        },
+        output: {
+          comments: false,
+          beautify: false
         }
       },
       sourceMap: config.build.productionSourceMap,

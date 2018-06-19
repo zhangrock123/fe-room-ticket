@@ -8,7 +8,7 @@
       <div class="col-1 paddingLR-10">
         <div class="app-flex app-flex-center">
           <div>
-            <svg @click="toggleCollapse" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" class="hamburger" :class="{'active': isCollapse}">
+            <svg @click="isCollapse=!isCollapse" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" class="hamburger" :class="{'active': isCollapse}">
               <path d="M966.8023 568.849776 57.196677 568.849776c-31.397081 0-56.850799-25.452695-56.850799-56.850799l0 0c0-31.397081 25.452695-56.849776 56.850799-56.849776l909.605623 0c31.397081 0 56.849776 25.452695 56.849776 56.849776l0 0C1023.653099 543.397081 998.200404 568.849776 966.8023 568.849776z"></path>
               <path d="M966.8023 881.527125 57.196677 881.527125c-31.397081 0-56.850799-25.452695-56.850799-56.849776l0 0c0-31.397081 25.452695-56.849776 56.850799-56.849776l909.605623 0c31.397081 0 56.849776 25.452695 56.849776 56.849776l0 0C1023.653099 856.07443 998.200404 881.527125 966.8023 881.527125z"></path>
               <path d="M966.8023 256.17345 57.196677 256.17345c-31.397081 0-56.850799-25.452695-56.850799-56.849776l0 0c0-31.397081 25.452695-56.850799 56.850799-56.850799l909.605623 0c31.397081 0 56.849776 25.452695 56.849776 56.850799l0 0C1023.653099 230.720755 998.200404 256.17345 966.8023 256.17345z"></path>
@@ -19,14 +19,14 @@
             <i class="icon-user user-avator"></i>
             <el-dropdown @command="dropdownCommand">
               <span class="el-dropdown-link">
-                Rock.Zhang<i class="el-icon-arrow-down el-icon--right"></i>
+                {{userInfo?userInfo.sysUserCode:''}}<i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="editUserInfo">
+                <!-- <el-dropdown-item command="editUserInfo">
                   <i class="el-icon-edit-outline"></i>
                   信息编辑
-                </el-dropdown-item>
-                <el-dropdown-item divided command="loginOut">
+                </el-dropdown-item> -->
+                <el-dropdown-item command="loginOut">
                   <i class="icon-power-off"></i>
                   退出登录
                 </el-dropdown-item>
@@ -72,7 +72,7 @@
 
 <script>
 import { Screenfull } from "@/components";
-import { mapMutations, mapActions } from "vuex";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 import utils from "@/utils";
 
 export default {
@@ -83,6 +83,9 @@ export default {
       isCollapse: false
     };
   },
+  computed: {
+    ...mapGetters(["userInfo"])
+  },
   components: {
     Screenfull
   },
@@ -90,11 +93,12 @@ export default {
     ...mapMutations(["CLEAR_USER_INFO"]),
     ...mapActions(["doUserLoginoutAction"]),
     menuOpen(key, keyPath) {
-      console.log(key, keyPath);
+      // console.log(key, keyPath);
     },
     menuClose(key, keyPath) {
-      console.log(key, keyPath);
+      // console.log(key, keyPath);
     },
+    // 配置左侧菜单
     initMenuList() {
       this.menuList = [
         {
@@ -114,6 +118,7 @@ export default {
     pathTo(menu) {
       this.$router.push({ name: menu.pathName, params: {}, query: {} });
     },
+    // 初始化菜单激活状态
     initMenuActive() {
       let curMenuTag = this.$route.meta.menuTag;
       if (curMenuTag == this.activeTag) {
@@ -121,23 +126,22 @@ export default {
       }
       this.activeTag = curMenuTag;
     },
+    // dropdown的选中方法
     dropdownCommand(command) {
       this[command] && this[command]();
     },
+    // 退出系统
     loginOut() {
-      this.$confirm("是否确认退出登录？").then(
+      this.$confirm("是否确认退出登录？", "退出登录").then(
         confirm => {
           this.doUserLoginoutAction().then(() => {
             this.$router.push({ name: "login" });
           });
         },
         cancel => {
-          console.log("err", err);
+          // console.log("err", err);
         }
       );
-    },
-    toggleCollapse() {
-      this.isCollapse = !this.isCollapse;
     }
   },
   watch: {
